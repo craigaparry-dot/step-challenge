@@ -24,7 +24,7 @@ const milestones = [
 ];
 
 export default function Home() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
   const [steps, setSteps] = useState("");
   const [totalSteps, setTotalSteps] = useState(0);
   const [distance, setDistance] = useState(0);
