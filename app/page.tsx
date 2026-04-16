@@ -1,6 +1,6 @@
 "use client";
 
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, User } from "firebase/auth";
 import { auth, provider, db } from "../lib/firebase";
 import { useState, useEffect } from "react";
 import { collection, addDoc, onSnapshot } from "firebase/firestore";
@@ -24,15 +24,15 @@ const milestones = [
 ];
 
 export default function Home() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [steps, setSteps] = useState("");
   const [totalSteps, setTotalSteps] = useState(0);
   const [distance, setDistance] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [leaderboard, setLeaderboard] = useState([]);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [currentLocation, setCurrentLocation] = useState("Leicester");
   const [nextLocation, setNextLocation] = useState("Liverpool");
-  const [lastMilestone, setLastMilestone] = useState(null);
+  const [lastMilestone, setLastMilestone] = useState<string | null>(null);
   const [notification, setNotification] = useState("");
 
   const signIn = async () => {
@@ -41,7 +41,7 @@ export default function Home() {
   };
 
   const submitSteps = async () => {
-    if (!steps) return;
+    if (!steps || !user) return;
 
     await addDoc(collection(db, "steps"), {
       userId: user.uid,
@@ -57,7 +57,7 @@ export default function Home() {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "steps"), (snapshot) => {
       let total = 0;
-      const userTotals = {};
+      const userTotals: any = {};
 
       snapshot.forEach((doc) => {
         const data = doc.data();
@@ -70,12 +70,12 @@ export default function Home() {
       setTotalSteps(total);
 
       const distanceKm = total * 0.0008;
-      setDistance(distanceKm.toFixed(2));
-      setProgress(((distanceKm / TOTAL_DISTANCE) * 100).toFixed(1));
+      setDistance(Number(distanceKm.toFixed(2)));
+      setProgress(Number(((distanceKm / TOTAL_DISTANCE) * 100).toFixed(1)));
 
       const leaderboardArray = Object.entries(userTotals)
         .map(([name, steps]) => ({ name, steps }))
-        .sort((a, b) => b.steps - a.steps);
+        .sort((a, b) => (b.steps as number) - (a.steps as number));
 
       setLeaderboard(leaderboardArray);
 
@@ -107,7 +107,6 @@ export default function Home() {
     return () => unsubscribe();
   }, []);
 
-  // POSITION LOGIC
   const userIndex = leaderboard.findIndex(
     (entry) => user && entry.name === user.displayName
   );
@@ -131,7 +130,6 @@ export default function Home() {
         minHeight: "100vh"
       }}
     >
-      {/* HEADER */}
       <h1 style={{ fontSize: "28px", marginBottom: "5px" }}>
         🏆 Walk to the World Cup
       </h1>
@@ -140,11 +138,6 @@ export default function Home() {
         Track your team's journey from Leicester to the final
       </p>
 
-      <p style={{ fontWeight: "500", marginBottom: "15px" }}>
-        ⚽ Can your team make it to the final?
-      </p>
-
-      {/* Notification */}
       {notification && (
         <div
           style={{
@@ -160,7 +153,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* MAIN GRID */}
       <div
         style={{
           display: "grid",
@@ -168,7 +160,6 @@ export default function Home() {
           gap: "20px"
         }}
       >
-        {/* LEFT PANEL */}
         <div
           style={{
             background: "white",
@@ -177,20 +168,18 @@ export default function Home() {
             boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
           }}
         >
-          <h2 style={{ marginBottom: "5px" }}>Total Steps</h2>
+          <h2>Total Steps</h2>
           <p style={{ fontSize: "22px", fontWeight: "bold" }}>
             {totalSteps}
           </p>
 
           <h3>{distance} km travelled</h3>
-          <h3>{progress}% of the journey completed</h3>
+          <h3>{progress}% complete</h3>
 
           <p>
-            📍 Currently at <strong>{currentLocation}</strong><br />
-            ➡️ Heading to <strong>{nextLocation}</strong>
+            📍 {currentLocation} → {nextLocation}
           </p>
 
-          {/* POSITION */}
           {user && userRank && (
             <div
               style={{
@@ -203,140 +192,46 @@ export default function Home() {
               <strong>You are #{userRank}</strong><br />
               {userRank === 1
                 ? "You're leading! 🥇"
-                : `${gapToLeader} steps behind the leader`}
+                : `${gapToLeader} steps behind leader`}
             </div>
           )}
 
-          {/* Progress bar */}
-          <div
-            style={{
-              width: "100%",
-              height: "20px",
-              background: "#eee",
-              borderRadius: "10px",
-              overflow: "hidden",
-              marginBottom: "20px"
-            }}
-          >
-            <div
-              style={{
-                width: `${progress}%`,
-                height: "100%",
-                background: "#0070f3"
-              }}
-            />
-          </div>
-
           {!user ? (
             <>
-              <p style={{ color: "#666" }}>Log in to contribute 👇</p>
-              <button
-                onClick={signIn}
-                style={{
-                  padding: "10px 20px",
-                  backgroundColor: "#0070f3",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer"
-                }}
-              >
-                Sign in with Google
-              </button>
+              <p>Log in to contribute 👇</p>
+              <button onClick={signIn}>Sign in with Google</button>
             </>
           ) : (
             <>
-              <p>Welcome {user.displayName}</p>
+              <p>Welcome {user?.displayName}</p>
 
-              <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+              <div style={{ display: "flex", gap: "10px" }}>
                 <input
                   type="number"
                   placeholder="Enter steps"
                   value={steps}
                   onChange={(e) => setSteps(e.target.value)}
-                  style={{
-                    flex: 1,
-                    padding: "10px",
-                    border: "1px solid #ccc",
-                    borderRadius: "6px"
-                  }}
                 />
-                <button
-                  onClick={submitSteps}
-                  style={{
-                    padding: "10px 20px",
-                    backgroundColor: "green",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px"
-                  }}
-                >
-                  Submit
-                </button>
+                <button onClick={submitSteps}>Submit</button>
               </div>
             </>
           )}
         </div>
 
-        {/* MAP */}
-        <div
-          style={{
-            background: "white",
-            borderRadius: "12px",
-            padding: "10px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
-          }}
-        >
-          <Map progress={Number(progress)} />
+        <div style={{ background: "white", borderRadius: "12px" }}>
+          <Map progress={progress} />
         </div>
       </div>
 
-      {/* LEADERBOARD */}
-      <div
-        style={{
-          marginTop: 20,
-          background: "white",
-          borderRadius: "12px",
-          padding: "15px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
-        }}
-      >
-        <h2>🏆 Team Leaderboard</h2>
-
-        {leaderboard[0] && (
-          <div
-            style={{
-              background: "#fff7cc",
-              padding: "10px",
-              borderRadius: "8px",
-              marginBottom: "10px",
-              fontWeight: "bold"
-            }}
-          >
-            🥇 Leader: {leaderboard[0].name} — {leaderboard[0].steps}
-          </div>
-        )}
+      <div style={{ marginTop: 20 }}>
+        <h2>🏆 Leaderboard</h2>
 
         {leaderboard.map((entry, index) => {
           const isUser = user && entry.name === user.displayName;
 
           return (
-            <div
-              key={index}
-              style={{
-                padding: "8px",
-                borderRadius: "6px",
-                background: isUser ? "#e6f7ff" : "transparent"
-              }}
-            >
-              {index === 0
-                ? "🥇"
-                : index === 1
-                ? "🥈"
-                : index === 2
-                ? "🥉"
-                : `${index + 1}.`}{" "}
-              {entry.name} — {entry.steps}
+            <div key={index}>
+              {index + 1}. {entry.name} — {entry.steps}
               {isUser && " (You)"}
             </div>
           );
