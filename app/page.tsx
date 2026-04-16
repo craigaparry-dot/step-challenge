@@ -196,26 +196,60 @@ export default function Home() {
             </div>
           )}
 
-          {!user ? (
-            <>
-              <p>Log in to contribute 👇</p>
-              <button onClick={signIn}>Sign in with Google</button>
-            </>
-          ) : (
-            <>
-              <p>Welcome {user?.displayName}</p>
+        {!user ? (
+  <>
+    <p style={{ color: "#666" }}>Log in to contribute 👇</p>
+    <button
+      onClick={signIn}
+      style={{
+        padding: "10px 20px",
+        backgroundColor: "#0070f3",
+        color: "white",
+        border: "none",
+        borderRadius: "6px",
+        cursor: "pointer",
+        fontWeight: "500"
+      }}
+    >
+      Sign in with Google
+    </button>
+  </>
+) : (
+  <>
+    <p>Welcome {user?.displayName}</p>
 
-              <div style={{ display: "flex", gap: "10px" }}>
-                <input
-                  type="number"
-                  placeholder="Enter steps"
-                  value={steps}
-                  onChange={(e) => setSteps(e.target.value)}
-                />
-                <button onClick={submitSteps}>Submit</button>
-              </div>
-            </>
-          )}
+    <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+      <input
+        type="number"
+        placeholder="Enter steps"
+        value={steps}
+        onChange={(e) => setSteps(e.target.value)}
+        style={{
+          flex: 1,
+          padding: "10px",
+          border: "1px solid #ccc",
+          borderRadius: "6px",
+          fontSize: "14px"
+        }}
+      />
+
+      <button
+        onClick={submitSteps}
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "green",
+          color: "white",
+          border: "none",
+          borderRadius: "6px",
+          cursor: "pointer",
+          fontWeight: "500"
+        }}
+      >
+        Submit
+      </button>
+    </div>
+  </>
+)}
         </div>
 
         <div style={{ background: "white", borderRadius: "12px" }}>
