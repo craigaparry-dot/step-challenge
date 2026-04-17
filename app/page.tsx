@@ -127,14 +127,15 @@ export default function Home() {
         margin: "0 auto",
         fontFamily: "system-ui, sans-serif",
         background: "#f9fafb",
-        minHeight: "100vh"
+        minHeight: "100vh",
+        color: "#111"
       }}
     >
       <h1 style={{ fontSize: "28px", marginBottom: "5px" }}>
         🏆 Walk to the World Cup
       </h1>
 
-      <p style={{ color: "#666", marginBottom: "10px" }}>
+      <p style={{ color: "#555", marginBottom: "10px" }}>
         Track your team's journey from Leicester to the final
       </p>
 
@@ -160,9 +161,11 @@ export default function Home() {
           gap: "20px"
         }}
       >
+        {/* LEFT PANEL */}
         <div
           style={{
-            background: "white",
+            background: "#ffffff",
+            color: "#111",
             borderRadius: "12px",
             padding: "15px",
             boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
@@ -196,75 +199,99 @@ export default function Home() {
             </div>
           )}
 
-        {!user ? (
-  <>
-    <p style={{ color: "#666" }}>Log in to contribute 👇</p>
-    <button
-      onClick={signIn}
-      style={{
-        padding: "10px 20px",
-        backgroundColor: "#0070f3",
-        color: "white",
-        border: "none",
-        borderRadius: "6px",
-        cursor: "pointer",
-        fontWeight: "500"
-      }}
-    >
-      Sign in with Google
-    </button>
-  </>
-) : (
-  <>
-    <p>Welcome {user?.displayName}</p>
+          {!user ? (
+            <>
+              <p style={{ color: "#666" }}>Log in to contribute 👇</p>
+              <button
+                onClick={signIn}
+                style={{
+                  padding: "10px 20px",
+                  backgroundColor: "#0070f3",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontWeight: "500"
+                }}
+              >
+                Sign in with Google
+              </button>
+            </>
+          ) : (
+            <>
+              <p>Welcome {user?.displayName}</p>
 
-    <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-      <input
-        type="number"
-        placeholder="Enter steps"
-        value={steps}
-        onChange={(e) => setSteps(e.target.value)}
-        style={{
-          flex: 1,
-          padding: "10px",
-          border: "1px solid #ccc",
-          borderRadius: "6px",
-          fontSize: "14px"
-        }}
-      />
+              <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+                <input
+                  type="number"
+                  placeholder="Enter steps"
+                  value={steps}
+                  onChange={(e) => setSteps(e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: "10px",
+                    border: "1px solid #ccc",
+                    borderRadius: "6px",
+                    fontSize: "14px"
+                  }}
+                />
 
-      <button
-        onClick={submitSteps}
-        style={{
-          padding: "10px 20px",
-          backgroundColor: "green",
-          color: "white",
-          border: "none",
-          borderRadius: "6px",
-          cursor: "pointer",
-          fontWeight: "500"
-        }}
-      >
-        Submit
-      </button>
-    </div>
-  </>
-)}
+                <button
+                  onClick={submitSteps}
+                  style={{
+                    padding: "10px 20px",
+                    backgroundColor: "green",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontWeight: "500"
+                  }}
+                >
+                  Submit
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
-        <div style={{ background: "white", borderRadius: "12px" }}>
+        {/* MAP */}
+        <div
+          style={{
+            background: "#ffffff",
+            borderRadius: "12px",
+            padding: "10px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+          }}
+        >
           <Map progress={progress} />
         </div>
       </div>
 
-      <div style={{ marginTop: 20 }}>
+      {/* LEADERBOARD */}
+      <div
+        style={{
+          marginTop: 20,
+          background: "#ffffff",
+          borderRadius: "12px",
+          padding: "15px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+        }}
+      >
         <h2>🏆 Leaderboard</h2>
 
         {leaderboard.map((entry, index) => {
           const isUser = user && entry.name === user.displayName;
 
           return (
-            <div key={index}>
+            <div
+              key={index}
+              style={{
+                padding: "8px",
+                borderRadius: "6px",
+                background: isUser ? "#e6f7ff" : "transparent"
+              }}
+            >
               {index + 1}. {entry.name} — {entry.steps}
               {isUser && " (You)"}
             </div>
